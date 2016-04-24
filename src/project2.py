@@ -39,11 +39,8 @@ class Project2:
 
             if (choice == "3") :
 
-
                 costMatrix = hungarianMethod.CostMatrix()
                 costMatrix.setValues(costMatrixIn)
-
-                costMatrix.setValues([[35,0,0,0],[0,30,0,5],[55,5,0,10],[0,45,30,45]])
 
                 print("costMatrix %s" % costMatrix.getMatrix())
                 print("crossedOutRows %s" % costMatrix.getCrossedOutRows())
@@ -75,9 +72,12 @@ class Project2:
 
                 print("cols with 1 uncovered zeros %s" % costMatrix.findColumnsWithNUncoveredZeros(1))
 
-
-costMatrix = hungarianMethod.CostMatrix()
-costMatrix.setValues(costMatrixIn)
+            if (choice == "4"):
+                costMatrixIn = [[35, 0, 0, 0], [0, 30, 0, 5], [55, 5, 0, 10], [0, 45, 30, 45]]
+                hungarianMachine = hungarianMethod.HungarianMachine()
+                hungarianMachine.setCostMatrix(costMatrixIn)
+                hungarianMachine.step3()
+                print("results %s" % hungarianMachine.getCostMatrix())
 
 
 
