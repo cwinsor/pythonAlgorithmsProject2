@@ -83,17 +83,8 @@ class Project2:
                 costMatrixIn = [[40, 0, 5, 0], [0, 25, 0, 0], [55, 0, 0, 5], [0, 40, 30, 40]]
                 hungarianMachine = hungarianMethod.HungarianMachine()
                 hungarianMachine.setCostMatrix(costMatrixIn)
-                hungarianMachine.step7()
+                hungarianMachine.step8()
 #                print("results %s" % hungarianMachine.getCostMatrix())
-
-            if (choice == "6"):
-                foobar = hungarianMethod.Foobar()
-                foobar.set(3)
-                print("before my foobar has %d" % foobar.getValue())
-
-                receivingAFoobar = hungarianMethod.ReceivingAFoobar()
-                receivingAFoobar.doSomethingToFoobar(foobar)
-                print("after my foobar has %d" % foobar.getValue())
 
         # print(costMatrix)2
 

@@ -2,22 +2,6 @@
 
 import sys
 
-class Foobar:
-    def set(self, value):
-        self.myValue = value
-
-    def increment(self):
-        self.myValue += 1
-
-    def getValue(self):
-        return self.myValue
-
-class ReceivingAFoobar:
-    def doSomethingToFoobar(self, aFoobar):
-        aFoobar.increment();
-        print("in ReceivingAFoobar.doSomethingToFoobar - it now has %d" % aFoobar.getValue())
-
-
 # reference
 # http://www.math.harvard.edu/archive/20_spring_05/handouts/assignment_overheads.pdf
 
@@ -172,6 +156,25 @@ class CostMatrix:
                 rowList.append(rowNum)
         return rowList
 
+    def findUnmarkedEntryWithFewestUnmarkedAdjacentZeros(self):
+        currentMinCount = sys.maxsize
+        self.currentRow = -1
+        self.currentCol = -1
+        for row in range(self.getSize()):
+            for col in range(self.getSize()):
+                if isZeroAndUncovered(row, col):
+                adjacentUncoveredZeros = countUncoveredInColumn(col) + countUncoveredInRow(row) - 2
+                if adjacentUncoveredZeros < currentMinCount:
+                    currentMinCount = adjacentUncoveredZeros
+                    self.currentRow = row
+                    self.currentCol = col
+
+    def getCurrentRowNum(self):
+        return self.currentRow
+
+    def getCurrentColNum(self):
+        return self.currentCol
+
 
 # reference
 # http://www.math.harvard.edu/archive/20_spring_05/handouts/assignment_overheads.pdf
@@ -293,6 +296,25 @@ class HungarianMachine:
         print("after step 6 task assignments are: %s" % taskAssignments)
         return taskAssignments
 
+
+    def step8(self):
+        taskAssignments = {}
+        self.cm.resetCrossedOutRows()
+        self.cm.resetCrossedOutColumns()
+        currentMin = sys.maxsize
+        while (self.cm.countRemainingUncoveredZeros() > 0):
+            self.cm.findUnmarkedEntryWithFewestUnmarkedAdjacentZeros()
+            row = self.cm.getCurrentRowNum()
+            col = self.cm.getCurrentColNum()
+            currentTaskAssignment = {}
+            currentTaskAssignment[row] = col
+            taskAssignments.append(currentTaskAssignment)
+            self.cm.crossOutColumns([col])
+            self.cm.crossOutRows([row])
+        print("after step 8 the task assignments are: %s" % taskAssignments)
+        return taskAssignments
+
+
     def step7(self):
         self.finalPathList = []
         pathSoFar = []
@@ -300,9 +322,6 @@ class HungarianMachine:
         print("after step7 the list of paths is: %s" % self.finalPathList)
         return
 
-    def quickTest(foobar):
-        foobar.increment()
-        return
 
     # we need to find combinations of zeros which
     # account for tasks and workers
