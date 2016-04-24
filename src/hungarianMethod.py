@@ -1,5 +1,7 @@
 """ Hungarian Method """
 
+import sys
+
 # reference
 # http://www.math.harvard.edu/archive/20_spring_05/handouts/assignment_overheads.pdf
 
@@ -22,36 +24,81 @@ class CostMatrix:
         self.crossedOutColumns = costMatrix[0]
         self.crossedOutColumns[:] = False
 
+    def getSize(self):
+        return self.size
 
     def getCost(self,row,col):
         return self.costMatrix[row][col]
 
     def subtractSmallestEntryFromRows(self):
-        return
+        for row in range(self.getSize()) :
+            minVal = sys.maxsize
+            for col in range(self.getSize()) :
+                if self.costMatrix[row][col] < minVal :
+                    minVal = col
+            for col in range(self.getSize()) :
+                self.costMatrix[row][col] =- minVal
 
     def subtractSmallestEntryFromColumns(self):
-        return
+        for col in range(self.getSize()):
+            minVal = sys.maxsize
+            for row in range(self.getSize()):
+                if self.costMatrix[col][row] < minVal:
+                    minVal = row
+            for row in range(self.getSize()):
+                self.costMatrix[col][row] = - minVal
 
     def countRemainingZeros(self):
-        return
+        numZeros = 0
+        for row in self.costMatrix :
+            for entry in row :
+                if entry == 0 :
+                    numZeros += 1
 
-    def findRowsWithNZeros(self, n): # returns a list of rows that have "n" zeros
-        return
+    def findRowsWithNUncoveredZeros(self, n): # returns a list of rows that have "n" zeros uncovered
+        rowList = []
+        for row in range(self.getSize()):
+            numZerosThisRow = 0
+            for col in range(self.getSize()):
+                if ((self.costMatrix[row][col]==0) and (self.crossOutRows[row]==False) and (self.crossedOutColumns[col]==False)) :
+                    numZerosThisRow += 1
+            if numZerosThisRow == n :
+                rowList.append(row)
+        return rowList
+
+    def findColumnsWithNZeros(self, n):  # returns a list of columns that have "n" zeros
+        colList = []
+        for col in range(self.getSize()):
+            numZerosThisCol = 0
+            for row in range(self.getSize()):
+                if ((self.costMatrix[row][col] == 0) and (self.crossOutRows[row] == False) and (self.crossedOutColumns[col] == False)):
+                    numZerosThisCol += 1
+            if numZerosThisCol == n:
+                colList.append(col)
+        return colList
+
 
     def crossOutRows(self, rowList): # crosses out the rows in the "rowList"
-        return
-
-    def numberOfCrossedOutRows(self):  # returns the number of crossed out columns
-        return
-
-    def findColumnsWithNZeros(self, n): # returns a list of columns that have "n" zeros
-        return
+        for row in rowList:
+            self.crossedOutRows[row] = True
 
     def crossOutColumns(self, columnList):  # crosses out the columns in the "columnList"
-        return
+        for col in columnList:
+            self.crossedOutColumns[col] = True
+                        
+    def numberOfCrossedOutRows(self):  # returns the number of crossed out columns
+        count = 0
+        for row in self.crossOutRows:
+            if (row):
+                count += 1
+        return count
 
     def numberOfCrossedOutColumns(self): # returns the number of crossed out columns
-        return
+        count = 0
+        for col in self.crossedOutColumns:
+            if (col):
+                count += 1
+        return count
 
 
 
