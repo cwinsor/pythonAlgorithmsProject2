@@ -2,6 +2,22 @@
 
 import sys
 
+class Foobar:
+    def set(self, value):
+        self.myValue = value
+
+    def increment(self):
+        self.myValue += 1
+
+    def getValue(self):
+        return self.myValue
+
+class ReceivingAFoobar:
+    def doSomethingToFoobar(self, aFoobar):
+        aFoobar.increment();
+        print("in ReceivingAFoobar.doSomethingToFoobar - it now has %d" % aFoobar.getValue())
+
+
 # reference
 # http://www.math.harvard.edu/archive/20_spring_05/handouts/assignment_overheads.pdf
 
@@ -279,9 +295,13 @@ class HungarianMachine:
 
     def step7(self):
         self.finalPathList = []
-        pathSoFar = {}
+        pathSoFar = []
         self.doIt(0,pathSoFar)
         print("after step7 the list of paths is: %s" % self.finalPathList)
+        return
+
+    def quickTest(foobar):
+        foobar.increment()
         return
 
     # we need to find combinations of zeros which
@@ -299,5 +319,7 @@ class HungarianMachine:
         # squirrel away current path and go to the next level of task
         rowsInThisColumnThatAreZero = self.cm.getZerosForColumn(columnNum)
         for rowNum in rowsInThisColumnThatAreZero:
-            pathSoFar[rowNum] = columnNum;
+            zona1 = {}
+            zona1[rowNum] = columnNum
+            pathSoFar.append(zona1);
             self.doIt(columnNum + 1, pathSoFar)

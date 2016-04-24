@@ -86,6 +86,14 @@ class Project2:
                 hungarianMachine.step7()
 #                print("results %s" % hungarianMachine.getCostMatrix())
 
+            if (choice == "6"):
+                foobar = hungarianMethod.Foobar()
+                foobar.set(3)
+                print("before my foobar has %d" % foobar.getValue())
+
+                receivingAFoobar = hungarianMethod.ReceivingAFoobar()
+                receivingAFoobar.doSomethingToFoobar(foobar)
+                print("after my foobar has %d" % foobar.getValue())
 
         # print(costMatrix)2
 
