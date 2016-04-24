@@ -1,6 +1,8 @@
 """ Hungarian Method """
 
 import sys
+from copy import copy, deepcopy
+
 
 # reference
 # http://www.math.harvard.edu/archive/20_spring_05/handouts/assignment_overheads.pdf
@@ -9,14 +11,15 @@ class CostMatrix:
     def __init__(self):
         return
 
-    def setValues(self, costMatrix): # takes in a square (n-by-n) cost matrix array [[x,x,x],[x,x,x],[x,x,x]]
+    def setValues(self, costMatrixIn): # takes in a square (n-by-n) cost matrix array [[x,x,x],[x,x,x],[x,x,x]]
         # sanity check - matrix needs to be square
-        if costMatrix.__len__() != costMatrix[0].__len__() :
+        if costMatrixIn.__len__() != costMatrixIn[0].__len__() :
             raise Exception("in CostMatrix - the input matrix was not square")
 
         # squirrel away the cost matrix, and its size
-        self.costMatrix = costMatrix
-        self.size = costMatrix[0].__len__()
+        self.costMatrixOriginal = deepcopy(costMatrixIn)
+        self.costMatrix = deepcopy(costMatrixIn)
+        self.size = costMatrixIn[0].__len__()
 
         # create lists of rows and columns that have been "crossed out"
         self.crossedOutRows = [False for i in range(self.size)]
@@ -25,16 +28,25 @@ class CostMatrix:
     def getSize(self):
         return self.size
 
+    def getValue(self, row, col):
+        return self.costMatrix[row][col]
+
+    def getValueOriginal(self, row, col):
+        return self.costMatrixOriginal[row][col]
+
     def getMatrix(self):
         return self.costMatrix
 
+    def getMatrixOriginal(self):
+        return self.costMatrixOriginal
+
     def resetCrossedOutRows(self):
-        for item in self.crossedOutRows:
-            item = False
+        for col in range(self.crossedOutRows.__len__()):
+            self.crossedOutRows[col] = False
 
     def resetCrossedOutColumns(self):
-        for item in self.crossedOutColumns:
-            item = False
+        for row in range(self.crossedOutColumns.__len__()):
+            self.crossedOutColumns[row] = False
 
     def getCrossedOutRows(self):
         return self.crossedOutRows
@@ -100,7 +112,9 @@ class CostMatrix:
         return self.costMatrix[row][col] == 0
 
     def isZeroAndUncovered(self, row, col):
-        return self.isZero(row,col) and self.isUncovered(row,col)
+        myIsZero = self.isZero(row,col)
+        myIsUncovered = self.isUncovered(row, col)
+        return myIsZero and myIsUncovered
 
     def crossOutRows(self, rowList): # crosses out the rows in the "rowList"
         for row in rowList:
@@ -156,24 +170,42 @@ class CostMatrix:
                 rowList.append(rowNum)
         return rowList
 
+    def countUncoveredInColumn(self, col):
+        count = 0
+        for rowNum in range(self.getSize()):
+            if self.isZeroAndUncovered(rowNum, col):
+                count += 1
+        return count
+
+    def countUncoveredInRow(self, row):
+        count = 0
+        for colNum in range(self.getSize()):
+            if self.isZeroAndUncovered(row,colNum):
+                count += 1
+        return count
+
+
     def findUnmarkedEntryWithFewestUnmarkedAdjacentZeros(self):
         currentMinCount = sys.maxsize
         self.currentRow = -1
         self.currentCol = -1
         for row in range(self.getSize()):
             for col in range(self.getSize()):
-                if isZeroAndUncovered(row, col):
-                adjacentUncoveredZeros = countUncoveredInColumn(col) + countUncoveredInRow(row) - 2
-                if adjacentUncoveredZeros < currentMinCount:
-                    currentMinCount = adjacentUncoveredZeros
-                    self.currentRow = row
-                    self.currentCol = col
+                if self.isZeroAndUncovered(row, col):
+                    adjacentUncoveredZeros = self.countUncoveredInColumn(col) + self.countUncoveredInRow(row) - 2
+                    if adjacentUncoveredZeros < currentMinCount:
+                        currentMinCount = adjacentUncoveredZeros
+                        self.currentRow = row
+                        self.currentCol = col
 
     def getCurrentRowNum(self):
         return self.currentRow
 
     def getCurrentColNum(self):
         return self.currentCol
+
+
+
 
 
 # reference
@@ -201,17 +233,23 @@ class HungarianMachine:
             self.step3() # repeat step 3
         # at this point we have an 'optimal' solution
         # we need to find the matchups...
-        taskAssignments = self.step6()
+        taskAssignments = self.step8()
+        self.step9(taskAssignments)
+
+
 
 
 
     #Subtract the smallest entry in each row from all the entries of its row
     def step1(self):
+        print("entering step 1 costMatrix: %s" % self.cm.getMatrix())
         self.cm.subtractSmallestEntryFromRows()
+        print("leaving step 1 costMatrix: %s" % self.cm.getMatrix())
 
     #Subtract the smallest entry in each column from all the entries of its column.
     def step2(self):
         self.cm.subtractSmallestEntryFromColumns()
+        print("leaving step 2 costMatrix: %s" % self.cm.getMatrix())
 
     #Draw lines through appropriate rows and columns so that all the zero entries
     #of the cost matrix are covered and the minimum number of such lines is used.
@@ -296,23 +334,46 @@ class HungarianMachine:
         print("after step 6 task assignments are: %s" % taskAssignments)
         return taskAssignments
 
-
+    # an "optimal assignment of zeros is possible"
+    # now to find that combination of zeros in the matrix...
+    #
+    # the task is to pick N of the "0" tasks to represent the task-resource matchup
+    # procedure is to repeatedly:
+    #   check each non-crossed-out zero for the one that has the fewest other zeros in its row and columns
+    #   this is the one we want to assign first (it has the least flexibility)
+    #   we then mark that row/column as "assigned"  and proceed to find the next-least-flexible
+    #   and so on
     def step8(self):
+        print("entering step 8 costMatrix: %s" % self.cm.getMatrix())
+        self.cm.resetCrossedOutRows()
+        self.cm.resetCrossedOutColumns()
         taskAssignments = {}
         self.cm.resetCrossedOutRows()
         self.cm.resetCrossedOutColumns()
+
+        print("entering step 8 crossedOutRows: %s" % self.cm.crossedOutRows)
+        print("entering step 8 crossedOutCols: %s" % self.cm.crossedOutColumns)
+
         currentMin = sys.maxsize
         while (self.cm.countRemainingUncoveredZeros() > 0):
             self.cm.findUnmarkedEntryWithFewestUnmarkedAdjacentZeros()
             row = self.cm.getCurrentRowNum()
             col = self.cm.getCurrentColNum()
-            currentTaskAssignment = {}
-            currentTaskAssignment[row] = col
-            taskAssignments.append(currentTaskAssignment)
+            taskAssignments[row] = col
             self.cm.crossOutColumns([col])
             self.cm.crossOutRows([row])
         print("after step 8 the task assignments are: %s" % taskAssignments)
         return taskAssignments
+
+    def step9(self,list):
+        mySum = 0
+        for key in list.keys():
+            value = list[key]
+            mySum += self.cm.getValueOriginal(key,value)
+        print("after step9 the sum is: %s" % mySum)
+        print("the current  matrix is %s" % self.cm.getMatrix())
+        print("the original matrix is %s" % self.cm.getMatrixOriginal())
+
 
 
     def step7(self):
