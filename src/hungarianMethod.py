@@ -11,21 +11,28 @@ class CostMatrix:
 
     def setValues(self, costMatrix): # takes in a square (n-by-n) cost matrix array [[x,x,x],[x,x,x],[x,x,x]]
         # sanity check - matrix needs to be square
-        if costMatrix.length() != costMatrix[0].length() :
+        if costMatrix.__len__() != costMatrix[0].__len__() :
             raise Exception("in CostMatrix - the input matrix was not square")
 
         # squirrel away the cost matrix, and its size
         self.costMatrix = costMatrix
-        self.size = costMatrix[0].length()
+        self.size = costMatrix[0].__len__()
 
         # create lists of rows and columns that have been "crossed out"
-        self.crossedOutRows = costMatrix[0]
-        self.crossedOutRows[:] = False
-        self.crossedOutColumns = costMatrix[0]
-        self.crossedOutColumns[:] = False
+        self.crossedOutRows = [False for i in range(self.size)]
+        self.crossedOutColumns = [False for i in range(self.size)]
 
     def getSize(self):
         return self.size
+
+    def getMatrix(self):
+        return self.costMatrix
+
+    def getCrossedOutRows(self):
+        return self.crossedOutRows
+
+    def getCrossedOutColumns(self):
+        return self.crossedOutColumns
 
     def getCost(self,row,col):
         return self.costMatrix[row][col]
@@ -35,18 +42,18 @@ class CostMatrix:
             minVal = sys.maxsize
             for col in range(self.getSize()) :
                 if self.costMatrix[row][col] < minVal :
-                    minVal = col
+                    minVal = self.costMatrix[row][col]
             for col in range(self.getSize()) :
-                self.costMatrix[row][col] =- minVal
+                self.costMatrix[row][col] -= minVal
 
     def subtractSmallestEntryFromColumns(self):
         for col in range(self.getSize()):
             minVal = sys.maxsize
             for row in range(self.getSize()):
-                if self.costMatrix[col][row] < minVal:
-                    minVal = row
+                if self.costMatrix[row][col] < minVal:
+                    minVal = self.costMatrix[row][col]
             for row in range(self.getSize()):
-                self.costMatrix[col][row] = - minVal
+                self.costMatrix[row][col] -= minVal
 
     def countRemainingZeros(self):
         numZeros = 0
@@ -54,24 +61,25 @@ class CostMatrix:
             for entry in row :
                 if entry == 0 :
                     numZeros += 1
+        return numZeros
 
     def findRowsWithNUncoveredZeros(self, n): # returns a list of rows that have "n" zeros uncovered
         rowList = []
         for row in range(self.getSize()):
             numZerosThisRow = 0
             for col in range(self.getSize()):
-                if ((self.costMatrix[row][col]==0) and (self.crossOutRows[row]==False) and (self.crossedOutColumns[col]==False)) :
+                if ((self.costMatrix[row][col]==0) and (self.crossedOutRows[row]==False) and (self.crossedOutColumns[col]==False)) :
                     numZerosThisRow += 1
             if numZerosThisRow == n :
                 rowList.append(row)
         return rowList
 
-    def findColumnsWithNZeros(self, n):  # returns a list of columns that have "n" zeros
+    def findColumnsWithNUncoveredZeros(self, n):  # returns a list of columns that have "n" zeros
         colList = []
         for col in range(self.getSize()):
             numZerosThisCol = 0
             for row in range(self.getSize()):
-                if ((self.costMatrix[row][col] == 0) and (self.crossOutRows[row] == False) and (self.crossedOutColumns[col] == False)):
+                if ((self.costMatrix[row][col] == 0) and (self.crossedOutRows[row] == False) and (self.crossedOutColumns[col] == False)):
                     numZerosThisCol += 1
             if numZerosThisCol == n:
                 colList.append(col)
@@ -85,7 +93,7 @@ class CostMatrix:
     def crossOutColumns(self, columnList):  # crosses out the columns in the "columnList"
         for col in columnList:
             self.crossedOutColumns[col] = True
-                        
+
     def numberOfCrossedOutRows(self):  # returns the number of crossed out columns
         count = 0
         for row in self.crossOutRows:
@@ -112,6 +120,10 @@ class HungarianMachine:
     def setCostMatrix(self, costMatrixIn):
         self.cm = CostMatrix()
         self.cm.setValues(costMatrixIn)
+
+    def getCostMatrix(self):
+        return self.cm.getMatrix()
+
 
     # run the Hungarian algorithm
     def run(self):

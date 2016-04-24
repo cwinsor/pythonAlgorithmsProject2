@@ -20,21 +20,58 @@ class Project2:
             if (choice == "2"):
                 break
 
-            costMatrix = []
+
+            costMatrixIn = []
             f = open('cost_matrix.txt', 'r')
 
             for line in f :
                 foo = line.strip()
                 p = foo.split(',')
                 r = [int(i) for i in p]
-                costMatrix.append(r)
+                costMatrixIn.append(r)
 
             # create and run using the Hungarian Method
-            hungarianMachine = hungarianMethod.HungarianMachine()
-            hungarianMachine.setCostMatrix(costMatrix)
-            hungarianMachine.run()
+            if (choice == "1"):
+                hungarianMachine = hungarianMethod.HungarianMachine()
+                hungarianMachine.setCostMatrix(costMatrixIn)
+                hungarianMachine.run()
+                print("results %s" % hungarianMachine.getCostMatrix())
+
+            if (choice == "3") :
 
 
+                costMatrix = hungarianMethod.CostMatrix()
+                costMatrix.setValues(costMatrixIn)
+
+                print("costMatrix %s" % costMatrix.getMatrix())
+                print("crossedOutRows %s" % costMatrix.getCrossedOutRows())
+                print("crossedOutCols %s" % costMatrix.getCrossedOutColumns())
+
+                costMatrix.subtractSmallestEntryFromRows();
+                print("after subtracting smallest value from rows %s" % costMatrix.getMatrix())
+                costMatrix.subtractSmallestEntryFromColumns();
+                print("after subtracting smallest value from cols %s" % costMatrix.getMatrix())
+
+                print("number of remaining zeros %d" % costMatrix.countRemainingZeros())
+
+                print("rows with 3 uncovered zeros %s" % costMatrix.findRowsWithNUncoveredZeros(3))
+                print("cols with 3 uncovered zeros %s" % costMatrix.findColumnsWithNUncoveredZeros(3))
+
+                rows = costMatrix.findRowsWithNUncoveredZeros(2)
+                print("rows with 2 uncovered zeros %s" % rows)
+                costMatrix.crossOutRows(rows)
+                rows = costMatrix.findRowsWithNUncoveredZeros(2)
+                print("rows with 2 uncovered zeros %s" % rows)
+
+                print("cols with 2 uncovered zeros %s" % costMatrix.findColumnsWithNUncoveredZeros(2))
+
+                rows = costMatrix.findRowsWithNUncoveredZeros(1)
+                print("rows with 1 uncovered zeros %s" % rows)
+                costMatrix.crossOutRows(rows)
+                rows = costMatrix.findRowsWithNUncoveredZeros(1)
+                print("rows with 1 uncovered zeros %s" % rows)
+
+                print("cols with 1 uncovered zeros %s" % costMatrix.findColumnsWithNUncoveredZeros(1))
 
             # print(costMatrix)2
 
