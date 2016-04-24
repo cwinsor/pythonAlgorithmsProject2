@@ -28,6 +28,14 @@ class CostMatrix:
     def getMatrix(self):
         return self.costMatrix
 
+    def resetCrossedOutRows(self):
+        for item in self.crossedOutRows:
+            item = False
+
+    def resetCrossedOutColumns(self):
+        for item in self.crossedOutColumns:
+            item = False
+
     def getCrossedOutRows(self):
         return self.crossedOutRows
 
@@ -55,11 +63,11 @@ class CostMatrix:
             for row in range(self.getSize()):
                 self.costMatrix[row][col] -= minVal
 
-    def countRemainingZeros(self):
+    def countRemainingUncoveredZeros(self):
         numZeros = 0
-        for row in self.costMatrix :
-            for entry in row :
-                if entry == 0 :
+        for rowNum in range(self.costMatrix.__len__()) :
+            for colNum in range(self.costMatrix.__len__()):
+                if self.isZeroAndUncovered(rowNum,colNum):
                     numZeros += 1
         return numZeros
 
@@ -68,7 +76,7 @@ class CostMatrix:
         for row in range(self.getSize()):
             numZerosThisRow = 0
             for col in range(self.getSize()):
-                if ((self.costMatrix[row][col]==0) and (self.crossedOutRows[row]==False) and (self.crossedOutColumns[col]==False)) :
+                if self.isZeroAndUncovered(row,col):
                     numZerosThisRow += 1
             if numZerosThisRow == n :
                 rowList.append(row)
@@ -79,12 +87,20 @@ class CostMatrix:
         for col in range(self.getSize()):
             numZerosThisCol = 0
             for row in range(self.getSize()):
-                if ((self.costMatrix[row][col] == 0) and (self.crossedOutRows[row] == False) and (self.crossedOutColumns[col] == False)):
+                if self.isZeroAndUncovered(row,col):
                     numZerosThisCol += 1
             if numZerosThisCol == n:
                 colList.append(col)
         return colList
 
+    def isUncovered(self, row, col):
+        return (self.crossedOutRows[row] == False) and (self.crossedOutColumns[col] == False)
+
+    def isZero(self, row, col):
+        return self.costMatrix[row][col] == 0
+
+    def isZeroAndUncovered(self, row, col):
+        return self.isZero(row,col) and self.isUncovered(row,col)
 
     def crossOutRows(self, rowList): # crosses out the rows in the "rowList"
         for row in rowList:
@@ -96,7 +112,7 @@ class CostMatrix:
 
     def numberOfCrossedOutRows(self):  # returns the number of crossed out columns
         count = 0
-        for row in self.crossOutRows:
+        for row in self.crossedOutRows:
             if (row):
                 count += 1
         return count
@@ -108,6 +124,25 @@ class CostMatrix:
                 count += 1
         return count
 
+    def getSmallestUncoveredEntry(self):
+        minVal = sys.maxsize
+        for row in range(self.getSize()) :
+            for col in range(self.getSize()) :
+                if (self.costMatrix[row][col] < minVal) and self.isUncovered(row,col) :
+                    minVal = self.costMatrix[row][col]
+        return minVal
+
+    def subtractFromEachUncoveredRow(self, n):
+        for row in range(self.getSize()):
+            if not self.crossedOutRows[row]:
+                for col in range(self.getSize()):
+                    self.costMatrix[row][col] -= n
+
+    def addToEachCoveredColumn(self, n):
+        for col in range(self.getSize()):
+            if self.crossedOutColumns[col]:
+                for row in range(self.getSize()):
+                    self.costMatrix[row][col] += n
 
 
 # reference
@@ -134,9 +169,9 @@ class HungarianMachine:
             self.step5() # determine smallest uncovered entry, subtract from uncov. rows, add to uncov. columns
             self.step3() # repeat step 3
 
-    # at this point we have an 'optimal' solution
-    # we need to find the matchups...
-
+        # at this point we have an 'optimal' solution
+        # we need to find the matchups...
+        foo = 2
 
 
     #Subtract the smallest entry in each row from all the entries of its row
@@ -151,39 +186,56 @@ class HungarianMachine:
     #of the cost matrix are covered and the minimum number of such lines is used.
     def step3(self):
 
-        lookingForRowColWithZerosTotaling = self.cm.countRemainingZeros()
-        while self.cm.countRemainingZeros() > 0 :
+        self.cm.resetCrossedOutRows()
+        self.cm.resetCrossedOutColumns()
+
+        # search for rows and columns with zeros in them
+        # start by searching for large numbers of zeros and progressively decrease
+        lookingForRowColWithZerosTotaling = self.cm.countRemainingUncoveredZeros()
+        while self.cm.countRemainingUncoveredZeros() > 0 :
+
+            zona1 = self.cm.crossedOutRows
+            zona2 = self.cm.crossedOutColumns
+
             foundSomething = False
 
             if (not foundSomething) :
-                rowList = self.cm.findRowsWithNZeros(lookingForRowColWithZerosTotaling)
-                if (rowList.length() > 0) :
+                rowList = self.cm.findRowsWithNUncoveredZeros(lookingForRowColWithZerosTotaling)
+                if (rowList.__len__() > 0) :
                     self.cm.crossOutRows(rowList)
                     foundSomething = True;
 
             if (not foundSomething) :
-                colList = self.cm.findColumnsWithNZeros(lookingForRowColWithZerosTotaling)
-                if (colList.length() > 0) :
+                colList = self.cm.findColumnsWithNUncoveredZeros(lookingForRowColWithZerosTotaling)
+                if (colList.__len__() > 0) :
                     self.cm.crossOutColumns(colList)
                     foundSomething = True;
 
             if (not foundSomething) :
                 lookingForRowColWithZerosTotaling -= 1
+        print("after step 3 costMatrix: %s" % self.cm.getMatrix())
+        print("after step 3 crossedOutRows: %s" % self.cm.crossedOutRows)
+        print("after step 3 crossedOutCols: %s" % self.cm.crossedOutColumns)
+
 
     def step4(self):
-        if   (self.cm.numberCrossedOutRows.length() + self.cm.numberCrossedOutColumns.length()) == self.cm.getSize() :
+        ncr = self.cm.numberOfCrossedOutRows()
+        ncc = self.cm.numberOfCrossedOutColumns()
+        if   (self.cm.numberOfCrossedOutRows() + self.cm.numberOfCrossedOutColumns()) == self.cm.getSize() :
             weAreDone = True
-            return True
-        elif (self.cm.numberCrossedOutRows.length() + self.cm.numberCrossedOutColumns.length())  < self.cm.getSize() :
+        elif (self.cm.numberOfCrossedOutRows() + self.cm.numberOfCrossedOutColumns())  < self.cm.getSize() :
             weAreDone = False
-            return False
         else :
             raise Exception('unexpected result in step 4')
+        print("--step 4 is returning weAreDone=%s" % weAreDone)
+        return weAreDone
 
     def step5(self):
         smallestUncoveredEntry = self.cm.getSmallestUncoveredEntry()
-        self.cm.subtractFromEachUncoveredRow(smallestUncoveredEntry);
-        self.cm.addToEachUncoveredColumn(smallestUncoveredEntry);
+        self.cm.subtractFromEachUncoveredRow(smallestUncoveredEntry)
+        self.cm.addToEachCoveredColumn(smallestUncoveredEntry)
+        print("after step 5: %s" % self.cm.getMatrix())
+
 
     def step6(self):
         print("we are done!!!")
