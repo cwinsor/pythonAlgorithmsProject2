@@ -79,9 +79,15 @@ class Project2:
                 hungarianMachine.step3()
                 print("results %s" % hungarianMachine.getCostMatrix())
 
+            if (choice == "5"):
+                costMatrixIn = [[40, 0, 5, 0], [0, 25, 0, 0], [55, 0, 0, 5], [0, 40, 30, 40]]
+                hungarianMachine = hungarianMethod.HungarianMachine()
+                hungarianMachine.setCostMatrix(costMatrixIn)
+                hungarianMachine.step7()
+#                print("results %s" % hungarianMachine.getCostMatrix())
 
 
-# print(costMatrix)2
+        # print(costMatrix)2
 
             #
             # remainingTasks = [];

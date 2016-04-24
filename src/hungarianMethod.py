@@ -144,6 +144,18 @@ class CostMatrix:
                 for row in range(self.getSize()):
                     self.costMatrix[row][col] += n
 
+    def findFirstUncoveredZeroInRow(self,row):
+        for col in range(self.getSize()):
+            if self.isZeroAndUncovered(row, col):
+                return col
+
+    def getZerosForColumn(self, colNum):
+        rowList = []
+        for rowNum in range(self.getSize()):
+            if self.isZero(rowNum, colNum):
+                rowList.append(rowNum)
+        return rowList
+
 
 # reference
 # http://www.math.harvard.edu/archive/20_spring_05/handouts/assignment_overheads.pdf
@@ -168,10 +180,10 @@ class HungarianMachine:
         while not self.step4(): #Test for optimality
             self.step5() # determine smallest uncovered entry, subtract from uncov. rows, add to uncov. columns
             self.step3() # repeat step 3
-
         # at this point we have an 'optimal' solution
         # we need to find the matchups...
-        foo = 2
+        taskAssignments = self.step6()
+
 
 
     #Subtract the smallest entry in each row from all the entries of its row
@@ -236,9 +248,56 @@ class HungarianMachine:
         self.cm.addToEachCoveredColumn(smallestUncoveredEntry)
         print("after step 5: %s" % self.cm.getMatrix())
 
-
+    # we have a matrix with tasks of size "0"
+    # we need to pick N of the "0" tasks to represent the task-resource matchup
+    #
+    # procedure is to step through rows searching
+    # searching for rows having "N" zeros
+    # start by searching for rows with 1 zero, and increase
+    #   if the row has only a single zero then that zero needs to be in the task-resource list
+    #   cross off that row (task) and column (resource)
+    #   if the row has two zeros - take the first (uncrossed-off)
+    #   cross of that row (task) and column (resource)
+    #   if the row has three zeros -  etc etc
+    # until all zeros are crossed off
     def step6(self):
-        print("we are done!!!")
+        taskAssignments = {}
+        self.cm.resetCrossedOutRows()
+        self.cm.resetCrossedOutColumns()
+        searchingForZeroCountOf = 1
+        while (self.cm.countRemainingUncoveredZeros()>0):
+            rowList = self.cm.findRowsWithNUncoveredZeros(searchingForZeroCountOf)
+            for row in rowList:
+                col = self.cm.findFirstUncoveredZeroInRow(row)
+                taskAssignments[row] = col;
+                self.cm.crossOutRows([row])
+                self.cm.crossOutColumns([col])
+            searchingForZeroCountOf += 1
 
+        print("after step 6 task assignments are: %s" % taskAssignments)
+        return taskAssignments
 
+    def step7(self):
+        self.finalPathList = []
+        pathSoFar = {}
+        self.doIt(0,pathSoFar)
+        print("after step7 the list of paths is: %s" % self.finalPathList)
+        return
 
+    # we need to find combinations of zeros which
+    # account for tasks and workers
+    # we perform a recursive search on task and worker combinations
+    # where the time for the worker/task is zero
+    def doIt(self, columnNum, pathSoFar):
+        print("entering doIt with pathSoFar %s" % pathSoFar)
+        print("                   columnNum %d" % columnNum)
+
+        if (columnNum == self.cm.getSize()): # we've gotten to a leaf
+            self.finalPathList.append(pathSoFar) # document this path
+            print("found leaf with path: %s" % pathSoFar)
+            return
+        # squirrel away current path and go to the next level of task
+        rowsInThisColumnThatAreZero = self.cm.getZerosForColumn(columnNum)
+        for rowNum in rowsInThisColumnThatAreZero:
+            pathSoFar[rowNum] = columnNum;
+            self.doIt(columnNum + 1, pathSoFar)
