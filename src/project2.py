@@ -1,6 +1,7 @@
 """ CS2223 Project 2 - Comparing Exhaustive Search with Greedy Algorithms """
 
-import hungarianMethod
+import class_hungarian_method
+
 
 class Project2:
 
@@ -14,7 +15,7 @@ class Project2:
         while True:
 
             print("Would you like to:")
-            print("1 -> run (read 'cost_matrix.txt' and run exhaustive and greedy searches)")
+            print("1 -> run (read 'cost_file.txt' and run exhaustive and greedy searches)")
             print("2 -> exit")
             choice = str(input("=>"))
             if (choice == "2"):
@@ -22,7 +23,7 @@ class Project2:
 
 
             costMatrixIn = []
-            f = open('cost_matrix.txt', 'r')
+            f = open('cost_file.txt', 'r')
 
             for line in f :
                 foo = line.strip()
@@ -30,16 +31,23 @@ class Project2:
                 r = [int(i) for i in p]
                 costMatrixIn.append(r)
 
+            print("the cost matrix is %s" % costMatrixIn)
+
             # create and run using the Hungarian Method
             if (choice == "1"):
-                hungarianMachine = hungarianMethod.HungarianMachine()
+                print("---------------------------")
+                print("after running Hungarian Method...")
+                hungarianMachine = class_hungarian_method.ClassHungarianMethod()
                 hungarianMachine.setCostMatrix(costMatrixIn)
                 hungarianMachine.run()
-                print("results %s" % hungarianMachine.getCostMatrix())
+
+            print("---------------------------")
+            print("after running Exhaustive Search...")
+
 
             if (choice == "3") :
 
-                costMatrix = hungarianMethod.CostMatrix()
+                costMatrix = class_hungarian_method.CostMatrix()
                 costMatrix.setValues(costMatrixIn)
 
                 print("costMatrix %s" % costMatrix.getMatrix())
@@ -74,78 +82,21 @@ class Project2:
 
             if (choice == "4"):
                 costMatrixIn = [[35, 0, 0, 0], [0, 30, 0, 5], [55, 5, 0, 10], [0, 45, 30, 45]]
-                hungarianMachine = hungarianMethod.HungarianMachine()
+                hungarianMachine = class_hungarian_method.HungarianMachine()
                 hungarianMachine.setCostMatrix(costMatrixIn)
                 hungarianMachine.step3()
                 print("results %s" % hungarianMachine.getCostMatrix())
 
             if (choice == "5"):
                 costMatrixIn = [[40, 0, 5, 0], [0, 25, 0, 0], [55, 0, 0, 5], [0, 40, 30, 40]]
-                hungarianMachine = hungarianMethod.HungarianMachine()
+                hungarianMachine = class_hungarian_method.HungarianMachine()
                 hungarianMachine.setCostMatrix(costMatrixIn)
                 taskAssignments = hungarianMachine.step8()
                 hungarianMachine.step9(taskAssignments)
-#                print("results %s" % hungarianMachine.getCostMatrix())
 
-        # print(costMatrix)2
-
-            #
-            # remainingTasks = [];
-            # remainingWorkers = [];
-            # for i in range(foo):
-            #     remainingWorkers.append(1)
-            # for i in range(foo):
-            #     remainingTasks.append(1)
-            #
-            # assignmentList = {};
-            # for assignmentNum in range(foo) :
-            #     lowCostWorker = 0;
-            #     lowCostTask = 0;
-            #     currentLowCost = 1000;
-            #     for workerNum in range (len(costMatrix)) :
-            #         for taskNum in range (len(costMatrix[workerNum])) :
-            #             #print(costMatrix[rowNum][colNum])
-            #             if (costMatrix[workerNum][taskNum] < currentLowCost) & (remainingWorkers[workerNum] == 1) & (remainingTasks[taskNum] == 1) :
-            #                 lowCostWorker = workerNum
-            #                 lowCostTask = taskNum
-            #                 currentLowCost = costMatrix[workerNum][taskNum]
-            #     remainingWorkers[lowCostWorker] = 0;
-            #     remainingTasks[lowCostTask] = 0;
-            #
-            #     assignmentList[lowCostWorker] = lowCostTask;
-            #
-            #     # at the end of the day we will have...
-            #     assignments = [[0,2], [1,3], [2,4], [3,0]]
-            #     print(assignments)
-            #     # then we will sum the costs to print total cost
-            #
-            #     # to generate the list of permutations...
-            #
-            #
-            #
-            # print (assignmentList)
-            # blah = 22
-            # break
-
-
-            # exhaustive search
-            # for each worker
-            #   for each task
-            #
-            # greedy algorithm
-            # search for
-
-                # Creates a list containing N lists, each of N items, all set to 0
-#           Matrix = [[0 for x in range(size)] for y in range(size)]
-#           Matrix[0][0] = 1
-#           Matrix[6][0] = 3 # error! range...
-#           Matrix[0][6] = 3 # valid
-#            print Matrix[0][0] # prints 1
-#            x, y = 0, 6
-#            print Matrix[x][y] # prints 3; be careful with indexing!
             break
 
-
+        print("---------------------------")
         print("Thank you, goodbye")
 
 
